@@ -1,34 +1,34 @@
 const { createChallenge, verifySolution } = require('altcha-lib');
 
 export default async function handler(req, res) {
-    // Enable CORS so your website can talk to this API
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all sites (or put your domain here)
+    // 1. Add Headers to prevent CORS blocks
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle the browser's "pre-flight" check
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const hmacKey = process.env.ALTCHA_SECRET || 'test-secret-key';
+    // 2. Use a fallback secret so it doesn't crash if Vercel variable is missing
+    const hmacKey = process.env.ALTCHA_SECRET || 'a_permanent_random_secret_string_here';
 
-    if (req.method === 'GET') {
-        try {
+    try {
+        if (req.method === 'GET') {
             const challenge = await createChallenge({
                 hmacKey: hmacKey,
                 maxNumber: 50000,
             });
-            return res.json(challenge);
-        } catch (err) {
-            return res.status(500).json({ error: 'Failed to create challenge' });
+            return res.status(200).json(challenge);
         }
-    }
 
-    if (req.method === 'POST') {
-        const { altcha_payload } = req.body;
-        const isValid = await verifySolution(altcha_payload, hmacKey);
-        if (isValid) return res.status(200).json({ success: true });
-        return res.status(400).json({ success: false });
+        if (req.method === 'POST') {
+            // Check if body exists (Vercel parses JSON automatically)
+            const payload = req.body.altcha_payload || req.body; 
+            const isValid = await verifySolution(payload, hmacKey);
+            return res.status(200).json({ success: isValid });
+        }
+    } catch (err) {
+        // This will print the actual error in your Vercel Logs
+        console.error("ALTCHA Error:", err);
+        return res.status(500).json({ error: err.message });
     }
 }
