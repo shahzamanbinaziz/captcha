@@ -1,0 +1,7 @@
+{
+  "name": "my-free-captcha",
+  "version": "1.0.0",
+  "dependencies": {
+    "altcha-lib": "^0.1.0"
+  }
+}
