@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Free Captcha Test</title>
+    <script async defer src="https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js" type="module"></script>
+</head>
+<body>
+    <h1>ALTCHA Test Form</h1>
+    
+    <form action="/api/verify" method="POST">
+        <input type="text" name="username" placeholder="Type name" required>
+        
+        <altcha-widget challengeurl="/api/verify"></altcha-widget>
+        
+        <button type="submit">Submit Form</button>
+    </form>
+</body>
+</html>
